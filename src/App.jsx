@@ -77,7 +77,15 @@ import {
 } from 'firebase/firestore';
 
 // --- Firebase Configuration ---
-const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+const firebaseConfig = {
+  apiKey: "AIzaSyC_aQYbRzfKGw-WDkeqRt7VLKcGGtmrZjo",
+  authDomain: "inspire-app-db.firebaseapp.com",
+  projectId: "inspire-app-db",
+  storageBucket: "inspire-app-db.firebasestorage.app",
+  messagingSenderId: "573976278306",
+  appId: "1:573976278306:web:a203cdfb514bd1d1e0617b",
+  measurementId: "G-849N0YDQJK"
+};
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
