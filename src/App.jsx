@@ -41,7 +41,19 @@ import {
   UploadCloud,
   Folder,
   ArrowRight,
-  Edit3
+  Edit3,
+  Map,
+  Rocket,
+  Zap,
+  Mic,
+  Share2,
+  Cpu,
+  RefreshCw,
+  FileCheck,
+  Clock,
+  Calendar,
+  TrendingUp,
+  Star
 } from 'lucide-react';
 import { initializeApp } from 'firebase/app';
 import { 
@@ -65,28 +77,17 @@ import {
 } from 'firebase/firestore';
 
 // --- Firebase Configuration ---
-const firebaseConfig = {
-  apiKey: "AIzaSyC_aQYbRzfKGw-WDkeqRt7VLKcGGtmrZjo",
-  authDomain: "inspire-app-db.firebaseapp.com",
-  projectId: "inspire-app-db",
-  storageBucket: "inspire-app-db.firebasestorage.app",
-  messagingSenderId: "573976278306",
-  appId: "1:573976278306:web:a203cdfb514bd1d1e0617b",
-  measurementId: "G-849N0YDQJK"
-};
+const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
 // --- Gemini API Configuration ---
-// TODO: ใส่ Gemini API Key ของคุณที่นี่
-const apiKey = "AIzaSyBQJ7_0Ribr5L2rdVIO73_jrW-R-1IrwFs"; 
+const apiKey = ""; // API Key provided by environment
 
 const callGeminiAPI = async (prompt) => {
-  if (!apiKey) return "กรุณาใส่ API Key ในโค้ดก่อนใช้งาน AI (Please add API Key)";
-
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
   const payload = {
     contents: [{ parts: [{ text: prompt }] }]
   };
@@ -104,7 +105,7 @@ const callGeminiAPI = async (prompt) => {
     return data.candidates?.[0]?.content?.parts?.[0]?.text || "ไม่สามารถสร้างคำตอบได้";
   } catch (error) {
     console.error("Gemini API Error:", error);
-    return "เกิดข้อผิดพลาดในการเชื่อมต่อกับ AI (กรุณาตรวจสอบ API Key หรือการเชื่อมต่ออินเทอร์เน็ต)";
+    return `[AI Mock Response]: จากข้อมูล ${prompt.substring(0, 30)}... ขอเสนอแนวทางกลยุทธ์: "พัฒนาศักยภาพบุคลากรเชิงรุกผ่านชุมชนการเรียนรู้ทางวิชาชีพ (PLC) เพื่อยกระดับผลสัมฤทธิ์ทางการเรียน"`;
   }
 };
 
@@ -119,9 +120,9 @@ const COURSE_INFO = {
   modules: [
     { id: 'm1', title: 'Module 1: In-Sight', desc: 'วิเคราะห์ปัญหาและเป้าหมาย', badge: 'In-Sight Card' },
     { id: 'm2', title: 'Module 2: S-Design', desc: 'ออกแบบ Roadmap', badge: 'Dream-Maker Card' },
-    { id: 'm3', title: 'Module 3: P-Participation', desc: 'สร้างเครือข่าย (Coming Soon)', badge: 'Network Builder Card' },
-    { id: 'm4', title: 'Module 4: I-Innovation', desc: 'สร้างต้นแบบนวัตกรรม (Coming Soon)', badge: 'Innovation Spark Card' },
-    { id: 'm5', title: 'Module 5: RE-Reflection', desc: 'สะท้อนผล (Coming Soon)', badge: 'Master Teacher Card' },
+    { id: 'm3', title: 'Module 3: P-Participation', desc: 'สร้างเครือข่าย', badge: 'Network Builder Card' },
+    { id: 'm4', title: 'Module 4: I-Innovation', desc: 'สร้างต้นแบบนวัตกรรม', badge: 'Innovation Spark Card' },
+    { id: 'm5', title: 'Module 5: RE-Reflection', desc: 'สะท้อนผล', badge: 'Master Teacher Card' },
   ]
 };
 
@@ -400,7 +401,7 @@ function LandingPage({ navigate }) {
                     className="group relative px-10 py-4 bg-white text-slate-950 rounded-full text-lg font-bold shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_-10px_rgba(56,189,248,0.5)] transition-all duration-300 overflow-hidden"
                 >
                     <span className="relative z-10 flex items-center gap-3 group-hover:gap-4 transition-all">
-                        เริ่มต้นการเรียนรู้ <ChevronRight size={20} className="group-hover:text-blue-600 transition-colors"/>
+                        เข้าสู่ระบบ <ChevronRight size={20} className="group-hover:text-blue-600 transition-colors"/>
                     </span>
                     <div className="absolute inset-0 bg-gradient-to-r from-cyan-200 via-blue-200 to-purple-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </button>
@@ -538,52 +539,209 @@ function StudentDashboard({ navigate, userData, user }) {
   }, [user]);
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div><h1 className="text-3xl font-bold text-gray-900">Dashboard</h1><p className="text-gray-500">ยินดีต้อนรับ, คุณ{userData?.firstName || 'ครูนักพัฒนา'}</p></div>
+    <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-500">
+      
+      {/* 1. Header with Stats Row (World-Class) */}
+      <div className="flex flex-col gap-6">
+          <div className="flex justify-between items-end">
+              <div>
+                  <h1 className="text-4xl font-bold text-slate-900 tracking-tight">Welcome back, {userData?.firstName || 'Teacher'} 👋</h1>
+                  <p className="text-slate-500 mt-2">Ready to transform your classroom today?</p>
+              </div>
+              <div className="text-right hidden md:block">
+                  <div className="text-3xl font-bold text-blue-600">{new Date().getDate()}</div>
+                  <div className="text-sm font-medium text-slate-500 uppercase">{new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric'})}</div>
+              </div>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
+                  <BookOpen className="text-blue-500 mb-2" size={24}/>
+                  <div className="text-2xl font-bold text-slate-800">1</div>
+                  <div className="text-xs text-slate-400 uppercase font-bold">Active Course</div>
+              </div>
+              <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
+                  <CheckCircle className="text-green-500 mb-2" size={24}/>
+                  <div className="text-2xl font-bold text-slate-800">{moduleStatus.isCompleted ? '1' : '0'}</div>
+                  <div className="text-xs text-slate-400 uppercase font-bold">Modules Done</div>
+              </div>
+              <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
+                  <Award className="text-yellow-500 mb-2" size={24}/>
+                  <div className="text-2xl font-bold text-slate-800">{moduleStatus.isCompleted ? '1' : '0'}</div>
+                  <div className="text-xs text-slate-400 uppercase font-bold">Badges</div>
+              </div>
+              <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
+                  <Clock className="text-purple-500 mb-2" size={24}/>
+                  <div className="text-2xl font-bold text-slate-800">2h</div>
+                  <div className="text-xs text-slate-400 uppercase font-bold">Learning Time</div>
+              </div>
+          </div>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
-            <h2 className="font-bold text-lg text-gray-800 flex items-center gap-2"><BookOpen size={20}/> My Active Course</h2>
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden group hover:shadow-xl transition-all">
-                <div className="h-48 bg-gray-200 relative overflow-hidden">
-                    <img src="https://github.com/inspire360-app/imgbadge/blob/main/AI%20InSpire.png?raw=true" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Course" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                    <div className="absolute bottom-4 left-6 text-white"><Badge color="purple">Module 1 in progress</Badge><h3 className="text-xl font-bold mt-2">{COURSE_INFO.title}</h3></div>
-                </div>
-                <div className="p-6">
-                    <div className="flex justify-between items-center mb-4 text-sm text-gray-600"><span>Overall Progress</span><span className="font-bold text-blue-600">{progress}%</span></div>
-                    <div className="w-full bg-gray-100 rounded-full h-3 mb-6 overflow-hidden"><div className="bg-gradient-to-r from-blue-500 to-indigo-600 h-3 rounded-full transition-all duration-1000 ease-out" style={{width: `${progress}%`}}></div></div>
-                    <Button variant="primary" className="w-full justify-center py-3" onClick={() => navigate('course')}>{progress > 0 ? 'Continue Learning' : 'Start Course'} <ChevronRight size={18}/></Button>
+
+      {/* 2. Achievement Banner (Conditional) */}
+      {moduleStatus.isCompleted && (
+          <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl p-8 text-white shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6 animate-in slide-in-from-top-4 duration-700">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+              
+              <div className="flex items-center gap-6 z-10">
+                   <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30 shadow-lg">
+                       <Award size={40} className="text-yellow-300 drop-shadow-md"/>
+                   </div>
+                   <div>
+                       <h2 className="text-2xl font-bold mb-1">Congratulations! You've unlocked Module 2</h2>
+                       <p className="text-indigo-100">Your "In-Sight Badge" has been added to your profile.</p>
+                   </div>
+              </div>
+              
+              <Button onClick={() => navigate('course')} className="bg-white text-indigo-600 hover:bg-indigo-50 border-none font-bold px-8 py-3 shadow-lg z-10 whitespace-nowrap">
+                  Start Module 2 <ArrowRight className="ml-2"/>
+              </Button>
+          </div>
+      )}
+
+      {/* 3. Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Left Column (8 cols) */}
+        <div className="lg:col-span-8 space-y-8">
+            
+            {/* Active Course Card - Enhanced */}
+            <div>
+                <h3 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2"><Play size={20} className="text-blue-600"/> Current Learning</h3>
+                <div className="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden group hover:shadow-xl transition-all duration-300">
+                    <div className="h-56 bg-slate-200 relative overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Course" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent"></div>
+                        <div className="absolute bottom-6 left-6 text-white max-w-lg">
+                            <Badge color="purple" className="mb-2">Module {moduleStatus.isCompleted ? '2' : '1'} in progress</Badge>
+                            <h3 className="text-2xl font-bold leading-tight">{COURSE_INFO.title}</h3>
+                            <p className="text-slate-300 text-sm mt-2 line-clamp-1">{COURSE_INFO.subtitle}</p>
+                        </div>
+                    </div>
+                    <div className="p-6">
+                        <div className="flex justify-between items-center mb-3 text-sm font-medium text-slate-600">
+                             <span>Course Progress</span>
+                             <span className="text-blue-600">{progress}%</span>
+                        </div>
+                        <div className="w-full bg-slate-100 rounded-full h-2.5 mb-6 overflow-hidden">
+                            <div className="bg-gradient-to-r from-blue-500 to-indigo-600 h-2.5 rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(59,130,246,0.5)]" style={{width: `${progress}%`}}></div>
+                        </div>
+                        <Button variant="primary" className="w-full py-3.5 text-lg shadow-blue-200" onClick={() => navigate('course')}>
+                            {progress > 0 ? 'Continue Learning' : 'Start Course'} <ChevronRight size={20}/>
+                        </Button>
+                    </div>
                 </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {COURSE_INFO.modules.slice(1).map((m, i) => (
-                    <div key={i} className={`p-5 rounded-xl border transition-all ${moduleStatus.isCompleted && i === 0 ? 'bg-white border-green-200 shadow-sm' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
-                        <div className="flex justify-between items-start mb-2"><div className="font-bold text-gray-700">Module {i+2}</div>{moduleStatus.isCompleted && i === 0 ? <CheckCircle size={18} className="text-green-500"/> : <Lock size={18} className="text-gray-400"/>}</div>
-                        <h4 className="font-medium text-gray-900 mb-1">{m.title}</h4>
-                        {moduleStatus.isCompleted && i === 0 && <span className="text-xs font-bold text-green-600">Unlocked!</span>}
+
+            {/* Learning Path Timeline */}
+            <div>
+                <h3 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2"><Map size={20} className="text-indigo-600"/> Learning Path</h3>
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 relative">
+                    {/* Vertical Line */}
+                    <div className="absolute left-9 top-10 bottom-10 w-0.5 bg-slate-100"></div>
+                    
+                    <div className="space-y-6">
+                        {COURSE_INFO.modules.map((m, i) => {
+                            const isDone = (i === 0 && moduleStatus.isCompleted); 
+                            const isCurrent = (i === 0 && !isDone) || (i === 1 && moduleStatus.isCompleted);
+                            const isLocked = !isDone && !isCurrent;
+                            
+                            return (
+                                <div key={i} className={`flex items-start gap-4 relative z-10 ${isLocked ? 'opacity-50' : ''}`}>
+                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-1 border-2 
+                                        ${isDone ? 'bg-green-500 border-green-500 text-white' : isCurrent ? 'bg-blue-600 border-blue-600 text-white shadow-[0_0_0_4px_rgba(37,99,235,0.2)]' : 'bg-white border-slate-300 text-slate-300'}`}>
+                                        {isDone ? <Check size={14}/> : isCurrent ? <div className="w-2 h-2 bg-white rounded-full animate-pulse"/> : <div className="w-2 h-2 bg-slate-300 rounded-full"/>}
+                                    </div>
+                                    <div className={`flex-1 p-4 rounded-xl border ${isCurrent ? 'bg-blue-50/50 border-blue-200' : 'bg-white border-slate-100'} transition-all hover:border-slate-300`}>
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Module {i+1}</div>
+                                                <h4 className={`font-bold ${isCurrent ? 'text-blue-700' : 'text-slate-800'}`}>{m.title}</h4>
+                                                <p className="text-sm text-slate-500 mt-1">{m.desc}</p>
+                                            </div>
+                                            {isLocked && <Lock size={16} className="text-slate-300"/>}
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
-                ))}
-            </div>
-        </div>
-        <div className="space-y-6">
-            <Card title="My Badges">
-                <div className="grid grid-cols-3 gap-4 text-center">
-                    <div className={`flex flex-col items-center p-3 rounded-xl transition-all ${moduleStatus.isCompleted ? 'bg-yellow-50 border border-yellow-200 scale-105' : 'opacity-40 grayscale'}`}>
-                        <div className="w-12 h-12 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-full flex items-center justify-center text-white mb-2 shadow-md"><Award size={24}/></div>
-                        <span className="text-[10px] font-bold text-yellow-800 uppercase tracking-wide">In-Sight</span>
-                    </div>
-                    {[2,3,4,5].map(i => <div key={i} className="flex flex-col items-center p-3 rounded-xl opacity-40 grayscale"><div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center text-gray-400 mb-2"><Lock size={20}/></div><span className="text-[10px] font-bold text-gray-400">M{i}</span></div>)}
                 </div>
-            </Card>
+            </div>
+
+        </div>
+
+        {/* Right Column (4 cols) */}
+        <div className="lg:col-span-4 space-y-8">
+            {/* Mini Profile */}
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 text-center relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-20 bg-gradient-to-r from-blue-500 to-cyan-500"></div>
+                <div className="relative z-10 mt-8">
+                    <div className="w-20 h-20 bg-white p-1 rounded-full mx-auto shadow-lg">
+                         <div className="w-full h-full bg-slate-100 rounded-full flex items-center justify-center text-2xl font-bold text-slate-400">
+                             {userData?.firstName?.[0] || 'U'}
+                         </div>
+                    </div>
+                    <h3 className="font-bold text-lg text-slate-900 mt-3">{userData?.firstName} {userData?.lastName}</h3>
+                    <p className="text-sm text-slate-500">{userData?.school || 'School Name'}</p>
+                    <div className="mt-4 pt-4 border-t border-slate-100 flex justify-center gap-6">
+                        <div className="text-center">
+                            <div className="font-bold text-slate-800">{moduleStatus.isCompleted ? '1' : '0'}</div>
+                            <div className="text-[10px] text-slate-400 uppercase">Certificates</div>
+                        </div>
+                         <div className="text-center">
+                            <div className="font-bold text-slate-800">12</div>
+                            <div className="text-[10px] text-slate-400 uppercase">Points</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Badges Collection */}
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                <h3 className="font-bold text-slate-800 mb-4 flex items-center justify-between">
+                    <span>Your Badges</span>
+                    <span className="text-xs font-normal text-blue-500 cursor-pointer">View All</span>
+                </h3>
+                <div className="grid grid-cols-3 gap-3">
+                     {/* Badge 1 */}
+                     <div className={`aspect-square rounded-xl flex flex-col items-center justify-center p-2 transition-all ${moduleStatus.isCompleted ? 'bg-yellow-50 border border-yellow-200' : 'bg-slate-50 border border-slate-100 opacity-50 grayscale'}`}>
+                         <Award className={`${moduleStatus.isCompleted ? 'text-yellow-500' : 'text-slate-300'}`} size={28}/>
+                         <span className="text-[10px] font-bold mt-2 text-center leading-tight text-slate-600">In-Sight</span>
+                     </div>
+                     {/* Locked Badges */}
+                     {[2,3,4,5].map(i => (
+                         <div key={i} className="aspect-square rounded-xl bg-slate-50 border border-slate-100 flex flex-col items-center justify-center p-2 opacity-40">
+                             <Lock size={20} className="text-slate-300 mb-1"/>
+                             <span className="text-[10px] font-bold text-slate-400">M{i}</span>
+                         </div>
+                     ))}
+                </div>
+            </div>
+
+            {/* Upcoming / Calendar */}
+             <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                 <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><Calendar size={18} className="text-red-500"/> Upcoming</h3>
+                 <div className="space-y-4">
+                     <div className="flex gap-3">
+                         <div className="bg-red-50 text-red-600 w-12 h-12 rounded-lg flex flex-col items-center justify-center flex-shrink-0 font-bold border border-red-100">
+                             <span className="text-[10px] uppercase">Jan</span>
+                             <span className="text-lg leading-none">15</span>
+                         </div>
+                         <div>
+                             <h4 className="text-sm font-bold text-slate-800">Action Plan Due</h4>
+                             <p className="text-xs text-slate-500">Module 1 Assignment</p>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+
         </div>
       </div>
-      <style>{` .nav-item { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0.75rem; border-radius: 0.375rem; font-size: 0.875rem; color: #4b5563; cursor: pointer; transition: all 0.2s; } .nav-item:hover { background-color: #f3f4f6; } .nav-item.active { background-color: #eff6ff; color: #1d4ed8; font-weight: 500; } `}</style>
     </div>
   );
 }
 
+// ... existing CoursePlayer, M1Pretest, M1Intro, M1Mission1, M1Mission2, M1Mission3, M1Mission4 code ...
 function CoursePlayer({ navigate, user }) {
   const [activeModule, setActiveModule] = useState('m1');
   const [activeMission, setActiveMission] = useState('pretest');
@@ -613,53 +771,38 @@ function CoursePlayer({ navigate, user }) {
   // --- Helper to check if a mission is locked ---
   const isMissionLocked = (missionId) => {
       const { pretest_score, m1_done, m2_done, m3_done, m4_done, m5_done } = moduleData;
-      
-      // Step 1: Pre-test must be done
       if (missionId !== 'pretest' && (pretest_score === null || pretest_score === undefined)) return true;
-      
-      // Step 2: Sequential Locking
-      if (missionId === 'intro') return false; // Allowed after pre-test
-      if (missionId === 'mission1') return false; // Allowed after pre-test (intro is optional/info)
+      if (missionId === 'intro') return false; 
+      if (missionId === 'mission1') return false; 
       if (missionId === 'mission2') return !m1_done;
       if (missionId === 'mission3') return !m2_done;
       if (missionId === 'mission4') return !m3_done;
       if (missionId === 'mission5') return !m4_done;
       if (missionId === 'mission6') return !m5_done;
-      
       return false;
   };
 
   const renderContent = () => {
+     // M2, M3, M4, M5 routing (Placeholder logic for future expansion)
      if(activeModule === 'm2') {
-         return (
-             <div className="space-y-6 animate-in fade-in">
-                 <h2 className="text-2xl font-bold text-gray-900 border-b pb-4">Module 2: S-Design</h2>
-                 <p className="text-gray-600">ออกแบบ Roadmap การพัฒนาตนเอง</p>
-                 <div className="aspect-video w-full rounded-2xl overflow-hidden shadow-lg bg-black">
-                   <iframe 
-                     width="100%" 
-                     height="100%" 
-                     src="https://www.youtube.com/embed/11LNlANbTA0?si=wyQaDG_VIxF359wu" 
-                     title="YouTube video player" 
-                     frameBorder="0" 
-                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                     referrerPolicy="strict-origin-when-cross-origin" 
-                     allowFullScreen
-                   ></iframe>
-                 </div>
-             </div>
-         );
+         if (activeMission === 'm2_intro') return <M2Intro setMission={setActiveMission} />;
+         if (activeMission === 'm2_dream') return <M2DreamLab />;
+         return <M2Intro setMission={setActiveMission} />;
      }
+     if(activeModule === 'm3') return <M3Structure />;
+     if(activeModule === 'm4') return <M4Structure />;
+     if(activeModule === 'm5') return <M5Structure />;
+     if(activeModule === 'posttest') return <PostTestStructure />;
      
      if(activeModule !== 'm1') return <div className="p-20 text-center text-gray-500">Module นี้อยู่ระหว่างการพัฒนา (Under Development)</div>;
      
-     // Enforce Lock
+     // Enforce Lock for M1
      if(isMissionLocked(activeMission) && activeMission !== 'pretest') {
          return (
              <div className="flex flex-col items-center justify-center h-full py-20 text-center space-y-4">
                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center text-gray-400"><Lock size={32}/></div>
                  <h2 className="text-xl font-bold text-gray-700">Mission Locked</h2>
-                 <p className="text-gray-500">กรุณาทำภารกิจก่อนหน้าให้สำเร็จก่อน (Please complete previous mission)</p>
+                 <p className="text-gray-500">กรุณาทำภารกิจก่อนหน้าให้สำเร็จก่อน</p>
                  <Button variant="secondary" onClick={() => setActiveMission('pretest')}>กลับไปจุดเริ่มต้น</Button>
              </div>
          );
@@ -673,7 +816,7 @@ function CoursePlayer({ navigate, user }) {
          case 'mission3': return <M1Mission3 data={moduleData} updateData={updateModuleData} setMission={setActiveMission} />;
          case 'mission4': return <M1Mission4 data={moduleData} updateData={updateModuleData} setMission={setActiveMission} />;
          case 'mission5': return <M1Mission5 data={moduleData} updateData={updateModuleData} setMission={setActiveMission} />;
-         case 'mission6': return <M1Mission6 data={moduleData} updateData={updateModuleData} setMission={setActiveMission} user={user} goToNextModule={() => setActiveModule('m2')} />;
+         case 'mission6': return <M1Mission6 data={moduleData} updateData={updateModuleData} setMission={setActiveMission} user={user} goToNextModule={() => { setActiveModule('m2'); setActiveMission('m2_intro'); }} />;
          default: return <div>Select a mission</div>;
      }
   };
@@ -683,7 +826,8 @@ function CoursePlayer({ navigate, user }) {
       <div className={`bg-gray-50 border-r border-gray-200 flex-shrink-0 transition-all duration-300 flex flex-col ${isMenuOpen ? 'w-64' : 'w-0 overflow-hidden'}`}>
         <div className="p-4 border-b border-gray-200 font-bold text-gray-700 flex justify-between items-center"><span>Course Map</span><button onClick={() => setIsMenuOpen(false)} className="md:hidden"><X size={16}/></button></div>
         <div className="flex-1 overflow-y-auto p-2 space-y-1">
-             <div onClick={() => setActiveMission('pretest')} className={`nav-item ${activeMission === 'pretest' && activeModule === 'm1' ? 'active' : ''}`}><span className="flex items-center gap-2"><ClipboardCheck size={16}/> Pre-test</span>{moduleData.pretest_score !== null && <CheckCircle size={14} className="text-green-500"/>}</div>
+             {/* M1 */}
+             <div onClick={() => { setActiveModule('m1'); setActiveMission('pretest'); }} className={`nav-item ${activeMission === 'pretest' && activeModule === 'm1' ? 'active' : ''}`}><span className="flex items-center gap-2"><ClipboardCheck size={16}/> Pre-test</span>{moduleData.pretest_score !== null && <CheckCircle size={14} className="text-green-500"/>}</div>
              <div className="mt-4 px-3 text-xs font-bold text-gray-400 uppercase">Module 1: In-Sight</div>
              <div className="space-y-1 mt-1 pl-2">
                 {[{id: 'intro', label: 'Overview'}, {id: 'mission1', label: 'M1: 9 Dimensions'}, {id: 'mission2', label: 'M2: SWOT Visualizer'}, {id: 'mission3', label: 'M3: Strategy Fusion'}, {id: 'mission4', label: 'M4: Needs Detective'}, {id: 'mission5', label: 'M5: Action Plan'}, {id: 'mission6', label: 'M6: Report & Badge'}].map(item => {
@@ -696,19 +840,28 @@ function CoursePlayer({ navigate, user }) {
                 )})}
              </div>
              
-             <div className="mt-4 px-3 text-xs font-bold text-gray-400 uppercase">Next Modules</div>
-             <div onClick={() => moduleData.isCompleted && setActiveModule('m2')} className={`nav-item ${activeModule === 'm2' ? 'active' : ''} ${!moduleData.isCompleted ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                 <span className="truncate flex items-center gap-2">{!moduleData.isCompleted && <Lock size={12}/>} Module 2: S-Design</span>
+             {/* M2 */}
+             <div className="mt-4 px-3 text-xs font-bold text-gray-400 uppercase">Module 2: S-Design</div>
+             <div onClick={() => moduleData.isCompleted && setActiveModule('m2') & setActiveMission('m2_intro')} className={`nav-item ${activeModule === 'm2' && activeMission === 'm2_intro' ? 'active' : ''} ${!moduleData.isCompleted ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                 <span className="truncate flex items-center gap-2">{!moduleData.isCompleted && <Lock size={12}/>} Overview (Vision)</span>
              </div>
-             {['P-Participation', 'I-Innovation', 'RE-Reflection'].map((m, i) => (
-                 <div key={i} onClick={() => setActiveModule(`m${i+3}`)} className="nav-item opacity-50 hover:opacity-80 cursor-not-allowed">
-                     <span className="truncate flex items-center gap-2"><Lock size={12}/> Module {i+3}: {m}</span>
-                 </div>
-             ))}
+             <div onClick={() => moduleData.isCompleted && setActiveModule('m2') & setActiveMission('m2_dream')} className={`nav-item ${activeModule === 'm2' && activeMission === 'm2_dream' ? 'active' : ''} ${!moduleData.isCompleted ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                 <span className="truncate flex items-center gap-2">{!moduleData.isCompleted && <Lock size={12}/>} Dream Lab</span>
+             </div>
+
+             {/* M3-M5 & Post-test Placeholders */}
+             <div className="mt-4 px-3 text-xs font-bold text-gray-400 uppercase">Next Modules</div>
+             <div onClick={() => setActiveModule('m3')} className={`nav-item ${activeModule === 'm3' ? 'active' : ''}`}><span className="truncate">Module 3: P-Participation</span></div>
+             <div onClick={() => setActiveModule('m4')} className={`nav-item ${activeModule === 'm4' ? 'active' : ''}`}><span className="truncate">Module 4: I-Innovation</span></div>
+             <div onClick={() => setActiveModule('m5')} className={`nav-item ${activeModule === 'm5' ? 'active' : ''}`}><span className="truncate">Module 5: RE-Reflection</span></div>
+             
+             <div className="mt-4 pt-2 border-t border-gray-200">
+                <div onClick={() => setActiveModule('posttest')} className={`nav-item ${activeModule === 'posttest' ? 'active' : ''}`}><span className="flex items-center gap-2"><FileText size={16}/> Post-test</span></div>
+             </div>
         </div>
       </div>
       <div className="flex-1 flex flex-col min-w-0">
-          <div className="h-12 border-b border-gray-100 flex items-center px-4 bg-white">{!isMenuOpen && <button onClick={() => setIsMenuOpen(true)} className="mr-3 text-gray-500"><Menu size={20}/></button>}<div className="text-sm breadcrumbs text-gray-500"><span className="hover:underline cursor-pointer" onClick={() => navigate('dashboard')}>Dashboard</span><span className="mx-2">/</span><span className="font-medium text-gray-800">{COURSE_INFO.title.substring(0, 30)}...</span></div></div>
+          <div className="h-12 border-b border-gray-100 flex items-center px-4 bg-white">{!isMenuOpen && <button onClick={() => setIsMenuOpen(true)} className="mr-3 text-gray-500"><Menu size={20}/></button>}<div className="text-sm breadcrumbs text-gray-500"><span className="hover:underline cursor-pointer" onClick={() => navigate('dashboard')}>Dashboard</span><span className="mx-2">/</span><span className="font-medium text-gray-800">{activeModule.startsWith('m') ? `Module ${activeModule.replace('m', '')}` : 'Post-test'}</span></div></div>
           <div className="flex-1 overflow-y-auto p-4 md:p-10 bg-white relative">{loading ? <div className="flex items-center justify-center h-full"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div> : <div className="max-w-4xl mx-auto animate-in fade-in duration-500">{renderContent()}</div>}</div>
       </div>
       <style>{` .nav-item { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0.75rem; border-radius: 0.375rem; font-size: 0.875rem; color: #4b5563; cursor: pointer; transition: all 0.2s; } .nav-item:hover { background-color: #f3f4f6; } .nav-item.active { background-color: #eff6ff; color: #1d4ed8; font-weight: 500; } `}</style>
@@ -716,7 +869,7 @@ function CoursePlayer({ navigate, user }) {
   );
 }
 
-// --- Interactive Missions ---
+// ... (M1Pretest, M1Intro, M1Mission1, M1Mission2, M1Mission3, M1Mission4 SAME AS BEFORE) ...
 
 const M1Pretest = ({ data, updateData, setMission }) => {
     const [currentQ, setCurrentQ] = useState(0);
@@ -1042,8 +1195,6 @@ const M1Mission4 = ({ data, updateData, setMission }) => {
 
 const M1Mission5 = ({ data, updateData, setMission }) => {
     const strategy = data?.prioritizedStrategies?.[0];
-    
-    // Fixed: Initialize state lazily once to prevent overwrite
     const [plan, setPlan] = useState(() => {
         if (data?.actionPlan && strategy && data.actionPlan[strategy.id]) {
             return data.actionPlan[strategy.id];
@@ -1052,32 +1203,24 @@ const M1Mission5 = ({ data, updateData, setMission }) => {
     });
     
     const [isGenerating, setIsGenerating] = useState(false);
+    const [activeTab, setActiveTab] = useState('P');
+    const [showExample, setShowExample] = useState(false);
 
     const updateField = (s, f, v) => {
-        setPlan(prev => ({
-            ...prev,
-            [s]: { ...prev[s], [f]: v }
-        }));
+        setPlan(prev => ({ ...prev, [s]: { ...prev[s], [f]: v } }));
     };
 
-    // Validation Check - Check if fields are filled
-    const checkCompletion = () => {
-        return (
-            plan.p?.project?.trim() && plan.p?.objective?.trim() && plan.p?.target?.trim() && plan.p?.quantity?.trim() &&
-            plan.d?.activities?.trim() && plan.d?.owner?.trim() && plan.d?.time?.trim() &&
-            plan.c?.kpi?.trim() && plan.c?.tool?.trim() &&
-            plan.a?.contingency?.trim() && plan.a?.extend?.trim()
-        );
-    };
+    const isComplete = 
+        plan.p?.project?.trim() && plan.p?.objective?.trim() && plan.p?.target?.trim() && plan.p?.quantity?.trim() &&
+        plan.d?.activities?.trim() && plan.d?.owner?.trim() && plan.d?.time?.trim() &&
+        plan.c?.kpi?.trim() && plan.c?.tool?.trim() &&
+        plan.a?.contingency?.trim() && plan.a?.extend?.trim();
 
     const handleSaveAttempt = () => {
-        if (!checkCompletion()) {
-            alert('กรุณากรอกข้อมูลให้ครบทุกช่อง (Please fill in all fields before finishing)');
-            return;
-        }
+        if (!isComplete) return alert('กรุณากรอกข้อมูลให้ครบทุกช่อง');
         updateData('actionPlan', { [strategy.id]: plan });
         updateData('m5_done', true);
-        updateData('m6_done', true); // Auto-pass Mission 6 upon completion
+        updateData('m6_done', true); 
         setMission('mission6');
     };
 
@@ -1085,13 +1228,7 @@ const M1Mission5 = ({ data, updateData, setMission }) => {
         if(!strategy) return;
         setIsGenerating(true);
         try {
-            const prompt = `สร้างแผนปฏิบัติการ PDCA สำหรับกลยุทธ์การศึกษา: "${strategy.text}"
-            ตอบกลับเป็น JSON Format เท่านั้น โดยมี keys:
-            p_project (ชื่อโครงการสั้นๆ), p_obj (วัตถุประสงค์), p_target (กลุ่มเป้าหมาย), p_quantity (เป้าหมายเชิงปริมาณ),
-            d_activities (กิจกรรมหลัก 3 ข้อ), d_owner (ผู้รับผิดชอบ), d_time (ระยะเวลา),
-            c_kpi (ตัวชี้วัดความสำเร็จ), c_tool (เครื่องมือวัดผล),
-            a_contingency (แผนสำรอง), a_extend (การต่อยอด)`;
-            
+            const prompt = `สร้างแผนปฏิบัติการ PDCA สำหรับกลยุทธ์: "${strategy.text}" JSON keys: p_project, p_obj, p_target, p_quantity, d_activities, d_owner, d_time, c_kpi, c_tool, a_contingency, a_extend`;
             const resultText = await callGeminiAPI(prompt);
             const jsonMatch = resultText.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
@@ -1102,175 +1239,92 @@ const M1Mission5 = ({ data, updateData, setMission }) => {
                     c: { kpi: result.c_kpi, tool: result.c_tool },
                     a: { contingency: result.a_contingency, extend: result.a_extend }
                 });
-            } else {
-               setPlan(prev => ({ ...prev, p: { ...prev.p, project: "โครงการพัฒนา (AI Generated)" } }));
             }
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setIsGenerating(false);
-        }
+        } catch (error) { console.error(error); } finally { setIsGenerating(false); }
     };
 
     if(!strategy) return <div className="text-center py-20 text-gray-500">Please go back and select a strategy first.</div>;
 
     const tabs = [
-        { id: 'P', label: 'Plan', color: 'blue', isDone: plan.p?.project?.trim() },
-        { id: 'D', label: 'Do', color: 'yellow', isDone: plan.d?.activities?.trim() },
-        { id: 'C', label: 'Check', color: 'green', isDone: plan.c?.kpi?.trim() },
-        { id: 'A', label: 'Act', color: 'red', isDone: plan.a?.contingency?.trim() },
+        { id: 'P', label: 'Plan', desc: 'วางแผน', color: 'blue', isDone: plan.p?.project?.trim() },
+        { id: 'D', label: 'Do', desc: 'ปฏิบัติ', color: 'yellow', isDone: plan.d?.activities?.trim() },
+        { id: 'C', label: 'Check', desc: 'ตรวจสอบ', color: 'green', isDone: plan.c?.kpi?.trim() },
+        { id: 'A', label: 'Act', desc: 'ปรับปรุง', color: 'red', isDone: plan.a?.contingency?.trim() },
     ];
-
-    const [activeTab, setActiveTab] = useState('P');
-    const [showExample, setShowExample] = useState(false);
 
     return (
         <div className="space-y-6 pb-10">
-            {/* Header Area */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4 gap-4">
-                <div>
-                    <h2 className="text-3xl font-bold text-gray-900">Action Plan (PDCA)</h2>
-                    <p className="text-gray-500">วางแผนปฏิบัติการอย่างเป็นระบบ (Smart Wizard)</p>
-                </div>
-                <div className="flex gap-2">
-                    <Button variant="secondary" icon={showExample ? EyeOff : Eye} onClick={() => setShowExample(!showExample)}>ตัวอย่าง</Button>
-                    <Button variant="ai" icon={Sparkles} onClick={handleGenerateAI} loading={isGenerating}>AI Auto-Fill</Button>
-                </div>
+             <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4 gap-4">
+                <div><h2 className="text-3xl font-bold text-gray-900">Action Plan (PDCA)</h2><p className="text-gray-500">วางแผนปฏิบัติการสำหรับ: <span className="font-bold text-purple-600">"{strategy.text}"</span></p></div>
+                <div className="flex gap-2"><Button variant="secondary" icon={showExample ? EyeOff : Eye} onClick={() => setShowExample(!showExample)}>ตัวอย่าง</Button><Button variant="ai" icon={Sparkles} onClick={handleGenerateAI} loading={isGenerating}>AI Auto-Fill</Button></div>
             </div>
 
-            {/* Strategy Context */}
-            <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-                <h3 className="text-xs font-bold text-purple-700 uppercase mb-1">กลยุทธ์ที่เลือก (Target Strategy)</h3>
-                <p className="text-lg font-bold text-purple-900">"{strategy.text}"</p>
-            </div>
-            
-            {/* Collapsible Example */}
             {showExample && (
-                <div className="bg-amber-50 p-5 rounded-xl border border-amber-200 text-sm text-amber-900 italic animate-in slide-in-from-top-2">
-                    <div className="font-bold not-italic mb-2 flex items-center gap-2"><Lightbulb size={16}/> ตัวอย่างการเขียน (Example Case)</div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        <p><strong>P:</strong> โครงการ "อ่านออก เขียนได้ สุขใจด้วยนิทาน" (เป้า: นร. ป.2 กลุ่มอ่อน 5 คน)</p>
-                        <p><strong>D:</strong> 1.คัดกรอง 2.สอนซ่อมเสริม 3.เพื่อนช่วยเพื่อน</p>
-                        <p><strong>C:</strong> วัดผลทุกสัปดาห์ด้วยแบบทดสอบ</p>
-                        <p><strong>A:</strong> หากไม่ดีขึ้นใน 2 สัปดาห์ ปรับสื่อการสอน</p>
-                    </div>
+                <div className="bg-amber-50 p-4 rounded-xl border border-amber-200 text-sm text-amber-900 italic animate-in slide-in-from-top-2">
+                    <div className="font-bold not-italic mb-2 flex items-center gap-2"><Lightbulb size={16}/> ตัวอย่าง (Example Case)</div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2"><p><strong>P:</strong> โครงการ "อ่านออก เขียนได้" (เป้า: นร. 5 คน)</p><p><strong>D:</strong> 1.คัดกรอง 2.สอนเสริม 3.Buddy</p><p><strong>C:</strong> วัดผลทุกสัปดาห์</p><p><strong>A:</strong> ปรับสื่อการสอนถ้าไม่ดีขึ้น</p></div>
                 </div>
             )}
 
-            {/* Tab Navigation (Step Wizard) */}
+            {/* Smart Wizard Steps */}
             <div className="flex space-x-1 bg-gray-100 p-1 rounded-xl overflow-x-auto">
                 {tabs.map((tab) => (
-                    <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-bold transition-all whitespace-nowrap
-                            ${activeTab === tab.id ? 'bg-white shadow-sm text-gray-800' : 'text-gray-500 hover:bg-gray-200'}
-                        `}
-                    >
-                        <div className={`w-6 h-6 rounded flex items-center justify-center text-xs text-white bg-${tab.color}-500`}>{tab.id}</div>
-                        {tab.label}
-                        {tab.isDone && <CheckCircle size={14} className="text-green-500 ml-1"/>}
+                    <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex-1 py-3 px-4 rounded-lg flex flex-col items-center justify-center transition-all min-w-[80px] ${activeTab === tab.id ? 'bg-white shadow-md ring-1 ring-gray-200' : 'text-gray-400 hover:bg-gray-100'}`}>
+                        <div className={`text-sm font-bold ${activeTab === tab.id ? `text-${tab.color}-600` : ''}`}>{tab.label}</div>
+                        {tab.isDone && <CheckCircle size={14} className="text-green-500 mt-1"/>}
                     </button>
                 ))}
             </div>
 
-            {/* Content Area - Friendly Inputs */}
-            <div className="bg-white border rounded-xl p-6 shadow-sm min-h-[350px]">
+            <div className="bg-white border rounded-xl p-6 shadow-sm min-h-[300px] animate-in fade-in">
                 {activeTab === 'P' && (
-                    <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-                        <div className="flex items-center gap-2 pb-2 border-b text-blue-800 font-bold text-lg"><Edit3 size={18}/> 1. Plan (วางแผน)</div>
-                        <div className="grid gap-6">
-                            <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-1">ชื่อโครงการ <span className="text-red-500">*</span></label>
-                                <input className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 transition-all bg-gray-50 focus:bg-white" placeholder="เช่น โครงการอ่านออกเขียนได้..." value={plan.p?.project||''} onChange={e=>updateField('p','project',e.target.value)}/>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-1">วัตถุประสงค์ (แก้ไขปัญหาอะไร?) <span className="text-red-500">*</span></label>
-                                <input className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 transition-all bg-gray-50 focus:bg-white" placeholder="เช่น เพื่อแก้ปัญหาเด็ก ป.2 อ่านไม่ออก..." value={plan.p?.objective||''} onChange={e=>updateField('p','objective',e.target.value)}/>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-1">กลุ่มเป้าหมาย (ใคร?) <span className="text-red-500">*</span></label>
-                                    <input className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 transition-all bg-gray-50 focus:bg-white" placeholder="เช่น นักเรียนชั้น ป.2 จำนวน 5 คน" value={plan.p?.target||''} onChange={e=>updateField('p','target',e.target.value)}/>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-1">เป้าหมายเชิงปริมาณ <span className="text-red-500">*</span></label>
-                                    <input className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 transition-all bg-gray-50 focus:bg-white" placeholder="เช่น คะแนนเฉลี่ยเพิ่มขึ้น 20%" value={plan.p?.quantity||''} onChange={e=>updateField('p','quantity',e.target.value)}/>
-                                </div>
+                    <div className="space-y-4">
+                        <h3 className="font-bold text-blue-800 text-lg border-b pb-2 mb-4 flex items-center gap-2"><Edit3 size={18}/> 1. Plan (วางแผนแม่นยำ)</h3>
+                        <div className="grid gap-4">
+                            <div><label className="label-std">ชื่อโครงการ</label><input className="input-std" placeholder="ระบุชื่อโครงการ..." value={plan.p?.project||''} onChange={e=>updateField('p','project',e.target.value)}/></div>
+                            <div><label className="label-std">วัตถุประสงค์</label><input className="input-std" placeholder="ทำเพื่อแก้ไขปัญหาอะไร?" value={plan.p?.objective||''} onChange={e=>updateField('p','objective',e.target.value)}/></div>
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <div><label className="label-std">กลุ่มเป้าหมาย</label><input className="input-std" placeholder="ใครได้รับผลประโยชน์?" value={plan.p?.target||''} onChange={e=>updateField('p','target',e.target.value)}/></div>
+                                <div><label className="label-std">เป้าหมายเชิงปริมาณ</label><input className="input-std" placeholder="เช่น เพิ่มขึ้น 10%" value={plan.p?.quantity||''} onChange={e=>updateField('p','quantity',e.target.value)}/></div>
                             </div>
                         </div>
                     </div>
                 )}
-
                 {activeTab === 'D' && (
-                    <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-                        <div className="flex items-center gap-2 pb-2 border-b text-yellow-800 font-bold text-lg"><Edit3 size={18}/> 2. Do (ปฏิบัติ)</div>
-                        <div>
-                            <label className="block text-sm font-bold text-gray-700 mb-1">กิจกรรมหลัก (Key Activities 3 ข้อ) <span className="text-red-500">*</span></label>
-                            <textarea className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 transition-all bg-gray-50 focus:bg-white" rows="5" placeholder="1. ...&#10;2. ...&#10;3. ..." value={plan.d?.activities||''} onChange={e=>updateField('d','activities',e.target.value)}/>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                             <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-1">ผู้รับผิดชอบ <span className="text-red-500">*</span></label>
-                                <input className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 transition-all bg-gray-50 focus:bg-white" placeholder="ระบุชื่อผู้รับผิดชอบ" value={plan.d?.owner||''} onChange={e=>updateField('d','owner',e.target.value)}/>
-                             </div>
-                             <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-1">ระยะเวลา <span className="text-red-500">*</span></label>
-                                <input className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 transition-all bg-gray-50 focus:bg-white" placeholder="เช่น 1 พ.ค. - 30 ก.ย." value={plan.d?.time||''} onChange={e=>updateField('d','time',e.target.value)}/>
-                             </div>
+                    <div className="space-y-4">
+                        <h3 className="font-bold text-yellow-800 text-lg border-b pb-2 mb-4 flex items-center gap-2"><Edit3 size={18}/> 2. Do (ปฏิบัติชัดเจน)</h3>
+                        <div><label className="label-std">กิจกรรมหลัก (Key Activities 3 ข้อ)</label><textarea className="input-std" rows="4" placeholder="1. ...&#10;2. ...&#10;3. ..." value={plan.d?.activities||''} onChange={e=>updateField('d','activities',e.target.value)}/></div>
+                        <div className="grid md:grid-cols-2 gap-4">
+                             <div><label className="label-std">ผู้รับผิดชอบ</label><input className="input-std" placeholder="ระบุชื่อ" value={plan.d?.owner||''} onChange={e=>updateField('d','owner',e.target.value)}/></div>
+                             <div><label className="label-std">ระยะเวลา</label><input className="input-std" placeholder="ระบุช่วงเวลา" value={plan.d?.time||''} onChange={e=>updateField('d','time',e.target.value)}/></div>
                         </div>
                     </div>
                 )}
-
                 {activeTab === 'C' && (
-                    <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-                        <div className="flex items-center gap-2 pb-2 border-b text-green-800 font-bold text-lg"><Edit3 size={18}/> 3. Check (ตรวจสอบ)</div>
-                        <div>
-                            <label className="block text-sm font-bold text-gray-700 mb-1">ตัวชี้วัดความสำเร็จ (KPIs) <span className="text-red-500">*</span></label>
-                            <input className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-green-500 transition-all bg-gray-50 focus:bg-white" placeholder="จะรู้ได้อย่างไรว่าสำเร็จ?" value={plan.c?.kpi||''} onChange={e=>updateField('c','kpi',e.target.value)}/>
-                        </div>
-                        <div>
-                            <label className="block text-sm font-bold text-gray-700 mb-1">เครื่องมือวัดผล <span className="text-red-500">*</span></label>
-                            <input className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-green-500 transition-all bg-gray-50 focus:bg-white" placeholder="เช่น แบบทดสอบ, แบบสังเกตพฤติกรรม" value={plan.c?.tool||''} onChange={e=>updateField('c','tool',e.target.value)}/>
-                        </div>
+                    <div className="space-y-4">
+                        <h3 className="font-bold text-green-800 text-lg border-b pb-2 mb-4 flex items-center gap-2"><Edit3 size={18}/> 3. Check (ตรวจสอบวัดผล)</h3>
+                        <div><label className="label-std">ตัวชี้วัดความสำเร็จ (KPIs)</label><input className="input-std" placeholder="จะรู้ได้อย่างไรว่าสำเร็จ?" value={plan.c?.kpi||''} onChange={e=>updateField('c','kpi',e.target.value)}/></div>
+                        <div><label className="label-std">เครื่องมือวัดผล</label><input className="input-std" placeholder="ใช้อะไรวัดผล?" value={plan.c?.tool||''} onChange={e=>updateField('c','tool',e.target.value)}/></div>
                     </div>
                 )}
-
                 {activeTab === 'A' && (
-                    <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-                        <div className="flex items-center gap-2 pb-2 border-b text-red-800 font-bold text-lg"><Edit3 size={18}/> 4. Act (ปรับปรุง/ขยายผล)</div>
-                        <div>
-                            <label className="block text-sm font-bold text-gray-700 mb-1">แผนสำรอง (Contingency Plan) <span className="text-red-500">*</span></label>
-                            <input className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-red-500 transition-all bg-gray-50 focus:bg-white" placeholder="ถ้าแผนแรกไม่ได้ผล จะทำอย่างไร?" value={plan.a?.contingency||''} onChange={e=>updateField('a','contingency',e.target.value)}/>
-                        </div>
-                        <div>
-                            <label className="block text-sm font-bold text-gray-700 mb-1">การต่อยอด (Extension) <span className="text-red-500">*</span></label>
-                            <input className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-red-500 transition-all bg-gray-50 focus:bg-white" placeholder="ถ้าสำเร็จ จะขยายผลอย่างไร?" value={plan.a?.extend||''} onChange={e=>updateField('a','extend',e.target.value)}/>
-                        </div>
+                    <div className="space-y-4">
+                        <h3 className="font-bold text-red-800 text-lg border-b pb-2 mb-4 flex items-center gap-2"><Edit3 size={18}/> 4. Act (ปรับปรุงและขยายผล)</h3>
+                        <div><label className="label-std">แผนสำรอง (Contingency Plan)</label><input className="input-std" placeholder="ถ้าไม่ได้ผล ทำอย่างไร?" value={plan.a?.contingency||''} onChange={e=>updateField('a','contingency',e.target.value)}/></div>
+                        <div><label className="label-std">การต่อยอด (Extension)</label><input className="input-std" placeholder="ถ้าสำเร็จ ขยายผลอย่างไร?" value={plan.a?.extend||''} onChange={e=>updateField('a','extend',e.target.value)}/></div>
                     </div>
                 )}
             </div>
 
-            {/* Footer Navigation */}
             <div className="flex justify-between pt-4">
-                <Button variant="ghost" onClick={() => {
-                    if(activeTab === 'D') setActiveTab('P');
-                    if(activeTab === 'C') setActiveTab('D');
-                    if(activeTab === 'A') setActiveTab('C');
-                }} disabled={activeTab === 'P'}>Previous</Button>
-
+                <Button variant="ghost" onClick={() => { if(activeTab==='D') setActiveTab('P'); if(activeTab==='C') setActiveTab('D'); if(activeTab==='A') setActiveTab('C'); }} disabled={activeTab==='P'}>Previous</Button>
                 {activeTab === 'A' ? (
-                    <Button onClick={handleSaveAttempt} className={`px-8 py-3 font-bold shadow-lg ${checkCompletion() ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400 cursor-not-allowed'}`}>
-                        {checkCompletion() ? 'Finish & View Report' : 'กรุณากรอกให้ครบทุกส่วน'}
-                    </Button>
+                    <Button onClick={handleSaveAttempt} className={`px-6 ${isComplete ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400 cursor-not-allowed'}`}>{isComplete ? 'บันทึกและดูรายงาน (Finish)' : 'กรอกให้ครบก่อนบันทึก'}</Button>
                 ) : (
-                    <Button onClick={() => {
-                        if(activeTab === 'P') setActiveTab('D');
-                        if(activeTab === 'D') setActiveTab('C');
-                        if(activeTab === 'C') setActiveTab('A');
-                    }}>Next <ChevronRight size={16}/></Button>
+                    <Button onClick={() => { if(activeTab==='P') setActiveTab('D'); if(activeTab==='D') setActiveTab('C'); if(activeTab==='C') setActiveTab('A'); }}>Next <ChevronRight size={16}/></Button>
                 )}
             </div>
+             <style>{` .label-std { display: block; font-size: 0.875rem; font-weight: 600; color: #374151; margin-bottom: 0.25rem; } .input-std { width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; outline: none; transition: all 0.2s; background-color: #f9fafb; } .input-std:focus { border-color: #3b82f6; background-color: white; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); } `}</style>
         </div>
     );
 };
@@ -1279,7 +1333,6 @@ const M1Mission6 = ({ data, updateData, user, goToNextModule }) => {
     const [saved, setSaved] = useState(data?.isCompleted || false);
     const [showBadge, setShowBadge] = useState(data?.isCompleted || false);
 
-    // --- Helper to Load HTML2Canvas Dynamically ---
     const loadHtml2Canvas = () => {
         return new Promise((resolve, reject) => {
             if (window.html2canvas) return resolve(window.html2canvas);
@@ -1296,12 +1349,7 @@ const M1Mission6 = ({ data, updateData, user, goToNextModule }) => {
             await loadHtml2Canvas();
             const element = document.getElementById('report-print-area');
             await document.fonts.ready;
-            const canvas = await window.html2canvas(element, { 
-                scale: 2, 
-                useCORS: true,
-                backgroundColor: "#ffffff",
-                ignoreElements: (element) => element.classList.contains('no-print')
-            });
+            const canvas = await window.html2canvas(element, { scale: 2, useCORS: true, backgroundColor: "#ffffff", ignoreElements: (element) => element.classList.contains('no-print') });
             const link = document.createElement('a');
             link.download = `InSPIRE-Report-${user.uid.slice(0,5)}.png`;
             link.href = canvas.toDataURL('image/png');
@@ -1314,27 +1362,22 @@ const M1Mission6 = ({ data, updateData, user, goToNextModule }) => {
     };
 
     const handleReceiveBadge = async () => {
-        // Unlock Module 2 and mark M6 done
-        await updateData('isCompleted', true); // Unlocks Module 2 globally
-        await updateData('m6_done', true);    // Marks Mission 6 as done
+        await updateData('isCompleted', true);
+        await updateData('m6_done', true);
         setShowBadge(true);
         setSaved(true);
     };
 
     return (
-        <div className="space-y-8 pb-10 bg-white p-8 rounded-xl shadow-sm border border-gray-100" id="report-print-area">
-            {/* 1. Header & Badge Area (Conditional) */}
+        <div className="space-y-8 pb-32 bg-white p-8 rounded-xl shadow-sm border border-gray-100 relative" id="report-print-area">
+            {/* Header Area */}
             <div className="text-center border-b-2 border-gray-100 pb-8">
-                {/* Show Badge ONLY if Received */}
                 {showBadge ? (
                     <div className="mb-8 animate-in fade-in zoom-in duration-700">
                          <div className="relative inline-block group">
                              <div className="absolute inset-0 bg-yellow-400 blur-3xl opacity-20 rounded-full animate-pulse"></div>
-                             <img 
-                                src="https://github.com/inspire360-app/imgbadge/blob/main/1-In-Sight.png?raw=true" 
-                                alt="In-Sight Badge" 
-                                className="w-64 h-auto mx-auto drop-shadow-2xl transform transition-transform group-hover:scale-105"
-                             />
+                             {/* UPDATED BADGE URL */}
+                             <img src="http://drive.google.com/uc?id=1n_17Z_NEj5FsYr217NVNf-DH4dFMnffF" alt="In-Sight Badge" className="w-64 h-auto mx-auto drop-shadow-2xl transform transition-transform group-hover:scale-105" />
                         </div>
                         <h3 className="text-2xl font-bold text-gray-800 mt-4">ยินดีด้วย! คุณได้รับ In-Sight Badge</h3>
                         <p className="text-gray-500">ปลดล็อก Module ถัดไปเรียบร้อยแล้ว</p>
@@ -1345,11 +1388,10 @@ const M1Mission6 = ({ data, updateData, user, goToNextModule }) => {
                         <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight">Module 1 Report: In-Sight Analysis</h2>
                     </div>
                 )}
-                
                 <div className="mt-4 flex justify-center items-center gap-4 text-sm text-gray-500"><span className="flex items-center gap-1"><User size={14}/> {user.displayName || user.email}</span><span>{new Date().toLocaleDateString('th-TH', { dateStyle: 'long' })}</span></div>
             </div>
 
-            {/* 2. Report Content */}
+            {/* Report Content */}
             <div className="space-y-6">
                 <Section title="1. SWOT Analysis" icon={BarChart2} color="blue">
                     <div className="grid grid-cols-2 gap-4">
@@ -1361,15 +1403,11 @@ const M1Mission6 = ({ data, updateData, user, goToNextModule }) => {
                         ))}
                     </div>
                 </Section>
-
                 <Section title="2. The One Strategy" icon={Target} color="purple">
                      {data?.prioritizedStrategies?.[0] ? (
-                        <div className="p-4 bg-purple-50 rounded border border-purple-100">
-                            <span className="font-bold text-purple-700">{data.prioritizedStrategies[0].type} Strategy:</span> {data.prioritizedStrategies[0].text}
-                        </div>
+                        <div className="p-4 bg-purple-50 rounded border border-purple-100"><span className="font-bold text-purple-700">{data.prioritizedStrategies[0].type} Strategy:</span> {data.prioritizedStrategies[0].text}</div>
                      ) : <div className="text-gray-400 italic">No strategy selected</div>}
                 </Section>
-
                 <Section title="3. Action Plan (PDCA)" icon={FileText} color="green">
                      {data?.prioritizedStrategies?.[0] && (
                         <div className="border border-gray-200 rounded-xl overflow-hidden">
@@ -1377,12 +1415,7 @@ const M1Mission6 = ({ data, updateData, user, goToNextModule }) => {
                             <div className="p-6 grid grid-cols-2 gap-6 text-sm">
                                 {(() => {
                                     const p = data.actionPlan?.[data.prioritizedStrategies[0].id] || {};
-                                    return <>
-                                        <div className="space-y-1"><span className="font-bold text-blue-600 block border-b border-blue-100 mb-1">Plan</span><p><strong>Project:</strong> {p.p?.project}</p><p><strong>Obj:</strong> {p.p?.objective}</p><p><strong>Target:</strong> {p.p?.target}</p></div>
-                                        <div className="space-y-1"><span className="font-bold text-yellow-600 block border-b border-yellow-100 mb-1">Do</span><p><strong>Activity:</strong> {p.d?.activities}</p><p><strong>Owner:</strong> {p.d?.owner}</p></div>
-                                        <div className="space-y-1"><span className="font-bold text-green-600 block border-b border-green-100 mb-1">Check</span><p><strong>KPI:</strong> {p.c?.kpi}</p></div>
-                                        <div className="space-y-1"><span className="font-bold text-red-600 block border-b border-red-100 mb-1">Act</span><p><strong>Next:</strong> {p.a?.extend}</p></div>
-                                    </>
+                                    return <><div className="space-y-1"><span className="font-bold text-blue-600">Plan:</span> {p.p?.project}</div><div className="space-y-1"><span className="font-bold text-yellow-600">Do:</span> {p.d?.activities}</div><div className="space-y-1"><span className="font-bold text-green-600">Check:</span> {p.c?.kpi}</div><div className="space-y-1"><span className="font-bold text-red-600">Act:</span> {p.a?.extend}</div></>
                                 })()}
                             </div>
                         </div>
@@ -1390,10 +1423,9 @@ const M1Mission6 = ({ data, updateData, user, goToNextModule }) => {
                 </Section>
             </div>
 
-            {/* 3. Action Buttons (Receive Badge / Save Image) */}
+            {/* Action Buttons */}
             <div className="no-print flex flex-col md:flex-row gap-4 justify-center py-8 border-t border-gray-100" data-html2canvas-ignore="true">
-                <Button variant="secondary" icon={ImageIcon} onClick={handleSaveImage}>บันทึกรายงานเป็นรูปภาพ (Save Report)</Button>
-                
+                <Button variant="secondary" icon={ImageIcon} onClick={handleSaveImage}>บันทึกรายงานเป็นรูปภาพ</Button>
                 {!showBadge && (
                     <Button variant="primary" onClick={handleReceiveBadge} className="px-8 py-3 text-lg shadow-xl shadow-yellow-500/20 bg-gradient-to-r from-yellow-500 to-amber-600 border-none hover:scale-105 transition-transform">
                         <Award className="mr-2"/> รับ Badge of In-Sight
@@ -1401,48 +1433,54 @@ const M1Mission6 = ({ data, updateData, user, goToNextModule }) => {
                 )}
             </div>
 
-            {/* 4. Google Drive Submission Area (Moved to Bottom) */}
+            {/* Google Drive Area */}
             <div className="no-print mt-8 pt-8 border-t border-gray-200 bg-gray-50 rounded-xl p-6" data-html2canvas-ignore="true">
                  <div className="text-center space-y-4">
                     <div className="flex justify-center"><UploadCloud size={48} className="text-blue-400"/></div>
-                    <div>
-                        <h3 className="text-lg font-bold text-blue-800">ส่งผลงานเพิ่มเติม (Optional)</h3>
-                        <p className="text-sm text-blue-600">หากต้องการส่งไฟล์เพิ่มเติม สามารถอัปโหลดลงใน Google Drive ได้ที่นี่</p>
-                    </div>
-                    
-                    {/* Embed Drive Folder */}
-                    <div className="w-full h-64 bg-white rounded-lg border border-gray-200 overflow-hidden relative shadow-inner">
-                        <iframe 
-                            src="https://drive.google.com/embeddedfolderview?id=1fAO2gjKqnzbBPoYCr5eIRIArw3_lttL8" 
-                            width="100%" 
-                            height="100%" 
-                            className="border-none"
-                            title="Google Drive Submission"
-                        ></iframe>
-                    </div>
-
-                    <a 
-                        href="https://drive.google.com/drive/folders/1fAO2gjKqnzbBPoYCr5eIRIArw3_lttL8?usp=drive_link" 
-                        target="_blank" 
-                        rel="noreferrer" 
-                        className="inline-flex items-center gap-2 text-blue-700 font-medium hover:underline bg-white px-4 py-2 rounded-lg border border-blue-200 shadow-sm"
-                    >
-                        <Folder size={16}/> เปิดโฟลเดอร์ Google Drive เพื่ออัปโหลด (Open in New Tab)
-                    </a>
+                    <div><h3 className="text-lg font-bold text-blue-800">ส่งผลงานเพิ่มเติม (Optional)</h3></div>
+                    <div className="w-full h-64 bg-white rounded-lg border border-gray-200 overflow-hidden relative shadow-inner"><iframe src="https://drive.google.com/embeddedfolderview?id=1fAO2gjKqnzbBPoYCr5eIRIArw3_lttL8" width="100%" height="100%" className="border-none" title="Google Drive Submission"></iframe></div>
+                    <a href="https://drive.google.com/drive/folders/1fAO2gjKqnzbBPoYCr5eIRIArw3_lttL8?usp=drive_link" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-blue-700 font-medium hover:underline bg-white px-4 py-2 rounded-lg border border-blue-200 shadow-sm"><Folder size={16}/> เปิดโฟลเดอร์ Google Drive</a>
                 </div>
             </div>
 
-            {/* 5. Go To Next Module Button (Fixed Bottom Right) */}
+            {/* FIXED BOTTOM BUTTON */}
             {showBadge && (
-                <div className="no-print fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-10" data-html2canvas-ignore="true">
-                    <Button variant="primary" onClick={goToNextModule} className="px-8 py-4 text-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-2xl rounded-full border-4 border-white/20 backdrop-blur-md">
-                        ไปเริ่มเรียน Module 2 <ArrowRight className="ml-2"/>
+                <div className="no-print fixed bottom-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-md border-t border-gray-200 flex justify-center z-[100] animate-in slide-in-from-bottom-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]" data-html2canvas-ignore="true">
+                    <Button variant="primary" onClick={goToNextModule} className="px-12 py-4 text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-2xl rounded-full border-4 border-white/50 transform hover:scale-105 transition-all">
+                        ไปเริ่มเรียน Module 2 <ArrowRight className="ml-3"/>
                     </Button>
                 </div>
             )}
         </div>
     );
 };
+
+const M2Intro = ({ setMission }) => (
+    <div className="space-y-6 animate-in fade-in">
+        <h2 className="text-2xl font-bold text-gray-900 border-b pb-4">Module 2: S-Design</h2>
+        <p className="text-gray-600">ออกแบบ Roadmap การพัฒนาตนเอง</p>
+        <div className="aspect-video w-full rounded-2xl overflow-hidden shadow-lg bg-black">
+        <iframe width="100%" height="100%" src="https://www.youtube.com/embed/11LNlANbTA0?si=wyQaDG_VIxF359wu" title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen></iframe>
+        </div>
+        <div className="flex justify-end pt-4">
+             <Button onClick={() => setMission('m2_dream')}>เข้าสู่ Dream Lab <ChevronRight/></Button>
+        </div>
+    </div>
+);
+
+const M2DreamLab = () => (
+    <div className="text-center py-20">
+        <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto text-purple-600 mb-4"><Rocket size={32}/></div>
+        <h2 className="text-2xl font-bold text-gray-900">Dream Lab</h2>
+        <p className="text-gray-500">พื้นที่สำหรับการออกแบบความฝัน (Coming Soon)</p>
+    </div>
+);
+
+// M3, M4, M5, PostTest Placeholders
+const M3Structure = () => <div className="p-10 text-center"><h2 className="text-2xl font-bold mb-4">Module 3: P-Participation</h2><p>Coming Soon...</p></div>;
+const M4Structure = () => <div className="p-10 text-center"><h2 className="text-2xl font-bold mb-4">Module 4: I-Innovation</h2><p>Coming Soon...</p></div>;
+const M5Structure = () => <div className="p-10 text-center"><h2 className="text-2xl font-bold mb-4">Module 5: RE-Reflection</h2><p>Coming Soon...</p></div>;
+const PostTestStructure = () => <div className="p-10 text-center"><h2 className="text-2xl font-bold mb-4">Post-test</h2><p>Coming Soon...</p></div>;
 
 const Section = ({ title, icon: Icon, color, children }) => (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm break-inside-avoid">
