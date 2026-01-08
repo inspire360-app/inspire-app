@@ -42,18 +42,10 @@ import {
   Folder,
   ArrowRight,
   Edit3,
-  Map,
   Rocket,
   Zap,
   Mic,
-  Share2,
-  Cpu,
-  RefreshCw,
-  FileCheck,
-  Clock,
-  Calendar,
-  TrendingUp,
-  Star
+  Map
 } from 'lucide-react';
 import { initializeApp } from 'firebase/app';
 import { 
@@ -219,16 +211,13 @@ export default function App() {
   // Auth & Init
   useEffect(() => {
     const initAuth = async () => {
-      try {
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+      // FIX 4: Removed automatic anonymous sign-in to prevent auto-login
+      if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+        try {
             await signInWithCustomToken(auth, __initial_auth_token);
-        } else {
-            if (!auth.currentUser) {
-                await signInAnonymously(auth); 
-            }
+        } catch (err) {
+            console.error("Token Auth Failed", err);
         }
-      } catch (err) {
-          console.error("Auth init error:", err);
       }
     };
     initAuth();
@@ -361,6 +350,7 @@ const SidebarItem = ({ icon: Icon, label, active, onClick, className = '' }) => 
     </div>
 );
 
+// ... LandingPage, AuthPage, StudentDashboard (Same as before) ...
 // --- Pages ---
 
 function LandingPage({ navigate }) {
@@ -547,209 +537,52 @@ function StudentDashboard({ navigate, userData, user }) {
   }, [user]);
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-500">
-      
-      {/* 1. Header with Stats Row (World-Class) */}
-      <div className="flex flex-col gap-6">
-          <div className="flex justify-between items-end">
-              <div>
-                  <h1 className="text-4xl font-bold text-slate-900 tracking-tight">Welcome back, {userData?.firstName || 'Teacher'} 👋</h1>
-                  <p className="text-slate-500 mt-2">Ready to transform your classroom today?</p>
-              </div>
-              <div className="text-right hidden md:block">
-                  <div className="text-3xl font-bold text-blue-600">{new Date().getDate()}</div>
-                  <div className="text-sm font-medium text-slate-500 uppercase">{new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric'})}</div>
-              </div>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
-                  <BookOpen className="text-blue-500 mb-2" size={24}/>
-                  <div className="text-2xl font-bold text-slate-800">1</div>
-                  <div className="text-xs text-slate-400 uppercase font-bold">Active Course</div>
-              </div>
-              <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
-                  <CheckCircle className="text-green-500 mb-2" size={24}/>
-                  <div className="text-2xl font-bold text-slate-800">{moduleStatus.isCompleted ? '1' : '0'}</div>
-                  <div className="text-xs text-slate-400 uppercase font-bold">Modules Done</div>
-              </div>
-              <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
-                  <Award className="text-yellow-500 mb-2" size={24}/>
-                  <div className="text-2xl font-bold text-slate-800">{moduleStatus.isCompleted ? '1' : '0'}</div>
-                  <div className="text-xs text-slate-400 uppercase font-bold">Badges</div>
-              </div>
-              <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
-                  <Clock className="text-purple-500 mb-2" size={24}/>
-                  <div className="text-2xl font-bold text-slate-800">2h</div>
-                  <div className="text-xs text-slate-400 uppercase font-bold">Learning Time</div>
-              </div>
-          </div>
+    <div className="max-w-6xl mx-auto space-y-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div><h1 className="text-3xl font-bold text-gray-900">Dashboard</h1><p className="text-gray-500">ยินดีต้อนรับ, คุณ{userData?.firstName || 'ครูนักพัฒนา'}</p></div>
       </div>
-
-      {/* 2. Achievement Banner (Conditional) */}
-      {moduleStatus.isCompleted && (
-          <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl p-8 text-white shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6 animate-in slide-in-from-top-4 duration-700">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
-              
-              <div className="flex items-center gap-6 z-10">
-                   <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30 shadow-lg">
-                       <Award size={40} className="text-yellow-300 drop-shadow-md"/>
-                   </div>
-                   <div>
-                       <h2 className="text-2xl font-bold mb-1">Congratulations! You've unlocked Module 2</h2>
-                       <p className="text-indigo-100">Your "In-Sight Badge" has been added to your profile.</p>
-                   </div>
-              </div>
-              
-              <Button onClick={() => navigate('course')} className="bg-white text-indigo-600 hover:bg-indigo-50 border-none font-bold px-8 py-3 shadow-lg z-10 whitespace-nowrap">
-                  Start Module 2 <ArrowRight className="ml-2"/>
-              </Button>
-          </div>
-      )}
-
-      {/* 3. Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Column (8 cols) */}
-        <div className="lg:col-span-8 space-y-8">
-            
-            {/* Active Course Card - Enhanced */}
-            <div>
-                <h3 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2"><Play size={20} className="text-blue-600"/> Current Learning</h3>
-                <div className="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden group hover:shadow-xl transition-all duration-300">
-                    <div className="h-56 bg-slate-200 relative overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Course" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent"></div>
-                        <div className="absolute bottom-6 left-6 text-white max-w-lg">
-                            <Badge color="purple" className="mb-2">Module {moduleStatus.isCompleted ? '2' : '1'} in progress</Badge>
-                            <h3 className="text-2xl font-bold leading-tight">{COURSE_INFO.title}</h3>
-                            <p className="text-slate-300 text-sm mt-2 line-clamp-1">{COURSE_INFO.subtitle}</p>
-                        </div>
-                    </div>
-                    <div className="p-6">
-                        <div className="flex justify-between items-center mb-3 text-sm font-medium text-slate-600">
-                             <span>Course Progress</span>
-                             <span className="text-blue-600">{progress}%</span>
-                        </div>
-                        <div className="w-full bg-slate-100 rounded-full h-2.5 mb-6 overflow-hidden">
-                            <div className="bg-gradient-to-r from-blue-500 to-indigo-600 h-2.5 rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(59,130,246,0.5)]" style={{width: `${progress}%`}}></div>
-                        </div>
-                        <Button variant="primary" className="w-full py-3.5 text-lg shadow-blue-200" onClick={() => navigate('course')}>
-                            {progress > 0 ? 'Continue Learning' : 'Start Course'} <ChevronRight size={20}/>
-                        </Button>
-                    </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-6">
+            <h2 className="font-bold text-lg text-gray-800 flex items-center gap-2"><BookOpen size={20}/> My Active Course</h2>
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden group hover:shadow-xl transition-all">
+                <div className="h-48 bg-gray-200 relative overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Course" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                    <div className="absolute bottom-4 left-6 text-white"><Badge color="purple">Module 1 in progress</Badge><h3 className="text-xl font-bold mt-2">{COURSE_INFO.title}</h3></div>
+                </div>
+                <div className="p-6">
+                    <div className="flex justify-between items-center mb-4 text-sm text-gray-600"><span>Overall Progress</span><span className="font-bold text-blue-600">{progress}%</span></div>
+                    <div className="w-full bg-gray-100 rounded-full h-3 mb-6 overflow-hidden"><div className="bg-gradient-to-r from-blue-500 to-indigo-600 h-3 rounded-full transition-all duration-1000 ease-out" style={{width: `${progress}%`}}></div></div>
+                    <Button variant="primary" className="w-full justify-center py-3" onClick={() => navigate('course')}>{progress > 0 ? 'Continue Learning' : 'Start Course'} <ChevronRight size={18}/></Button>
                 </div>
             </div>
-
-            {/* Learning Path Timeline */}
-            <div>
-                <h3 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2"><Map size={20} className="text-indigo-600"/> Learning Path</h3>
-                <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 relative">
-                    {/* Vertical Line */}
-                    <div className="absolute left-9 top-10 bottom-10 w-0.5 bg-slate-100"></div>
-                    
-                    <div className="space-y-6">
-                        {COURSE_INFO.modules.map((m, i) => {
-                            const isDone = (i === 0 && moduleStatus.isCompleted); 
-                            const isCurrent = (i === 0 && !isDone) || (i === 1 && moduleStatus.isCompleted);
-                            const isLocked = !isDone && !isCurrent;
-                            
-                            return (
-                                <div key={i} className={`flex items-start gap-4 relative z-10 ${isLocked ? 'opacity-50' : ''}`}>
-                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-1 border-2 
-                                        ${isDone ? 'bg-green-500 border-green-500 text-white' : isCurrent ? 'bg-blue-600 border-blue-600 text-white shadow-[0_0_0_4px_rgba(37,99,235,0.2)]' : 'bg-white border-slate-300 text-slate-300'}`}>
-                                        {isDone ? <Check size={14}/> : isCurrent ? <div className="w-2 h-2 bg-white rounded-full animate-pulse"/> : <div className="w-2 h-2 bg-slate-300 rounded-full"/>}
-                                    </div>
-                                    <div className={`flex-1 p-4 rounded-xl border ${isCurrent ? 'bg-blue-50/50 border-blue-200' : 'bg-white border-slate-100'} transition-all hover:border-slate-300`}>
-                                        <div className="flex justify-between items-start">
-                                            <div>
-                                                <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Module {i+1}</div>
-                                                <h4 className={`font-bold ${isCurrent ? 'text-blue-700' : 'text-slate-800'}`}>{m.title}</h4>
-                                                <p className="text-sm text-slate-500 mt-1">{m.desc}</p>
-                                            </div>
-                                            {isLocked && <Lock size={16} className="text-slate-300"/>}
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {COURSE_INFO.modules.slice(1).map((m, i) => (
+                    <div key={i} className={`p-5 rounded-xl border transition-all ${moduleStatus.isCompleted && i === 0 ? 'bg-white border-green-200 shadow-sm' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
+                        <div className="flex justify-between items-start mb-2"><div className="font-bold text-gray-700">Module {i+2}</div>{moduleStatus.isCompleted && i === 0 ? <CheckCircle size={18} className="text-green-500"/> : <Lock size={18} className="text-gray-400"/>}</div>
+                        <h4 className="font-medium text-gray-900 mb-1">{m.title}</h4>
+                        {moduleStatus.isCompleted && i === 0 && <span className="text-xs font-bold text-green-600">Unlocked!</span>}
                     </div>
-                </div>
+                ))}
             </div>
-
         </div>
-
-        {/* Right Column (4 cols) */}
-        <div className="lg:col-span-4 space-y-8">
-            {/* Mini Profile */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 text-center relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-20 bg-gradient-to-r from-blue-500 to-cyan-500"></div>
-                <div className="relative z-10 mt-8">
-                    <div className="w-20 h-20 bg-white p-1 rounded-full mx-auto shadow-lg">
-                         <div className="w-full h-full bg-slate-100 rounded-full flex items-center justify-center text-2xl font-bold text-slate-400">
-                             {userData?.firstName?.[0] || 'U'}
-                         </div>
+        <div className="space-y-6">
+            <Card title="My Badges">
+                <div className="grid grid-cols-3 gap-4 text-center">
+                    <div className={`flex flex-col items-center p-3 rounded-xl transition-all ${moduleStatus.isCompleted ? 'bg-yellow-50 border border-yellow-200 scale-105' : 'opacity-40 grayscale'}`}>
+                        <div className="w-12 h-12 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-full flex items-center justify-center text-white mb-2 shadow-md"><Award size={24}/></div>
+                        <span className="text-[10px] font-bold text-yellow-800 uppercase tracking-wide">In-Sight</span>
                     </div>
-                    <h3 className="font-bold text-lg text-slate-900 mt-3">{userData?.firstName} {userData?.lastName}</h3>
-                    <p className="text-sm text-slate-500">{userData?.school || 'School Name'}</p>
-                    <div className="mt-4 pt-4 border-t border-slate-100 flex justify-center gap-6">
-                        <div className="text-center">
-                            <div className="font-bold text-slate-800">{moduleStatus.isCompleted ? '1' : '0'}</div>
-                            <div className="text-[10px] text-slate-400 uppercase">Certificates</div>
-                        </div>
-                         <div className="text-center">
-                            <div className="font-bold text-slate-800">12</div>
-                            <div className="text-[10px] text-slate-400 uppercase">Points</div>
-                        </div>
-                    </div>
+                    {[2,3,4,5].map(i => <div key={i} className="flex flex-col items-center p-3 rounded-xl opacity-40 grayscale"><div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center text-gray-400 mb-2"><Lock size={20}/></div><span className="text-[10px] font-bold text-gray-400">M{i}</span></div>)}
                 </div>
-            </div>
-
-            {/* Badges Collection */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-                <h3 className="font-bold text-slate-800 mb-4 flex items-center justify-between">
-                    <span>Your Badges</span>
-                    <span className="text-xs font-normal text-blue-500 cursor-pointer">View All</span>
-                </h3>
-                <div className="grid grid-cols-3 gap-3">
-                     {/* Badge 1 */}
-                     <div className={`aspect-square rounded-xl flex flex-col items-center justify-center p-2 transition-all ${moduleStatus.isCompleted ? 'bg-yellow-50 border border-yellow-200' : 'bg-slate-50 border border-slate-100 opacity-50 grayscale'}`}>
-                         <Award className={`${moduleStatus.isCompleted ? 'text-yellow-500' : 'text-slate-300'}`} size={28}/>
-                         <span className="text-[10px] font-bold mt-2 text-center leading-tight text-slate-600">In-Sight</span>
-                     </div>
-                     {/* Locked Badges */}
-                     {[2,3,4,5].map(i => (
-                         <div key={i} className="aspect-square rounded-xl bg-slate-50 border border-slate-100 flex flex-col items-center justify-center p-2 opacity-40">
-                             <Lock size={20} className="text-slate-300 mb-1"/>
-                             <span className="text-[10px] font-bold text-slate-400">M{i}</span>
-                         </div>
-                     ))}
-                </div>
-            </div>
-
-            {/* Upcoming / Calendar */}
-             <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-                 <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><Calendar size={18} className="text-red-500"/> Upcoming</h3>
-                 <div className="space-y-4">
-                     <div className="flex gap-3">
-                         <div className="bg-red-50 text-red-600 w-12 h-12 rounded-lg flex flex-col items-center justify-center flex-shrink-0 font-bold border border-red-100">
-                             <span className="text-[10px] uppercase">Jan</span>
-                             <span className="text-lg leading-none">15</span>
-                         </div>
-                         <div>
-                             <h4 className="text-sm font-bold text-slate-800">Action Plan Due</h4>
-                             <p className="text-xs text-slate-500">Module 1 Assignment</p>
-                         </div>
-                     </div>
-                 </div>
-             </div>
-
+            </Card>
         </div>
       </div>
+      <style>{` .nav-item { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0.75rem; border-radius: 0.375rem; font-size: 0.875rem; color: #4b5563; cursor: pointer; transition: all 0.2s; } .nav-item:hover { background-color: #f3f4f6; } .nav-item.active { background-color: #eff6ff; color: #1d4ed8; font-weight: 500; } `}</style>
     </div>
   );
 }
 
-// ... existing CoursePlayer, M1Pretest, M1Intro, M1Mission1, M1Mission2, M1Mission3, M1Mission4 code ...
 function CoursePlayer({ navigate, user }) {
   const [activeModule, setActiveModule] = useState('m1');
   const [activeMission, setActiveMission] = useState('pretest');
@@ -766,7 +599,7 @@ function CoursePlayer({ navigate, user }) {
     if(!moduleRef) return;
     const unsub = onSnapshot(moduleRef, (doc) => {
         if(doc.exists()) { setModuleData(doc.data()); } 
-        else { setDoc(moduleRef, { pretest_score: null, nineDimensions: {}, swot: { S:[], W:[], O:[], T:[] }, strategies: [], prioritizedStrategies: [], actionPlan: {}, isCompleted: false }); }
+        else { setDoc(moduleRef, { pretest_score: null, nineDimensions: {}, swot: { S:[], W:[], O:[], T:[] }, strategies: [], prioritizedStrategies: [], actionPlan: {}, isCompleted: false, m1_done: false, m2_done: false, m3_done: false, m4_done: false, m5_done: false }); }
         setLoading(false);
     });
     return () => unsub();
@@ -776,9 +609,10 @@ function CoursePlayer({ navigate, user }) {
       try { await setDoc(moduleRef, { [key]: value }, { merge: true }); } catch (e) { console.error(e); }
   };
 
-  // --- Helper to check if a mission is locked ---
+  // FIX 3: Logic to unlock M3, M4, M5 sequentially
   const isMissionLocked = (missionId) => {
       const { pretest_score, m1_done, m2_done, m3_done, m4_done, m5_done } = moduleData;
+      
       if (missionId !== 'pretest' && (pretest_score === null || pretest_score === undefined)) return true;
       if (missionId === 'intro') return false; 
       if (missionId === 'mission1') return false; 
@@ -791,18 +625,18 @@ function CoursePlayer({ navigate, user }) {
   };
 
   const renderContent = () => {
-     // M2, M3, M4, M5 routing (Placeholder logic for future expansion)
      if(activeModule === 'm2') {
          if (activeMission === 'm2_intro') return <M2Intro setMission={setActiveMission} />;
-         if (activeMission === 'm2_dream') return <M2DreamLab />;
+         if (activeMission === 'm2_dream') return <M2DreamLab updateData={updateModuleData} />;
+         if (activeMission === 'm2_sprint') return <M2DesignSprint updateData={updateModuleData} />;
+         if (activeMission === 'm2_play') return <M2Playground updateData={updateModuleData} />;
          return <M2Intro setMission={setActiveMission} />;
      }
-     if(activeModule === 'm3') return <M3Structure />;
-     if(activeModule === 'm4') return <M4Structure />;
-     if(activeModule === 'm5') return <M5Structure />;
-     if(activeModule === 'posttest') return <PostTestStructure />;
      
-     if(activeModule !== 'm1') return <div className="p-20 text-center text-gray-500">Module นี้อยู่ระหว่างการพัฒนา (Under Development)</div>;
+     if(activeModule === 'm3') return <div className="p-20 text-center"><h2 className="text-2xl font-bold">Module 3: P-Participation</h2><p>Coming Soon...</p></div>;
+     if(activeModule === 'm4') return <div className="p-20 text-center"><h2 className="text-2xl font-bold">Module 4: I-Innovation</h2><p>Coming Soon...</p></div>;
+     if(activeModule === 'm5') return <div className="p-20 text-center"><h2 className="text-2xl font-bold">Module 5: RE-Reflection</h2><p>Coming Soon...</p></div>;
+     if(activeModule === 'posttest') return <div className="p-20 text-center"><h2 className="text-2xl font-bold">Post-test</h2><p>Coming Soon...</p></div>;
      
      // Enforce Lock for M1
      if(isMissionLocked(activeMission) && activeMission !== 'pretest') {
@@ -850,21 +684,28 @@ function CoursePlayer({ navigate, user }) {
              
              {/* M2 */}
              <div className="mt-4 px-3 text-xs font-bold text-gray-400 uppercase">Module 2: S-Design</div>
+             {/* FIX 3: Module Lock Logic */}
              <div onClick={() => moduleData.isCompleted && setActiveModule('m2') & setActiveMission('m2_intro')} className={`nav-item ${activeModule === 'm2' && activeMission === 'm2_intro' ? 'active' : ''} ${!moduleData.isCompleted ? 'opacity-50 cursor-not-allowed' : ''}`}>
                  <span className="truncate flex items-center gap-2">{!moduleData.isCompleted && <Lock size={12}/>} Overview (Vision)</span>
              </div>
              <div onClick={() => moduleData.isCompleted && setActiveModule('m2') & setActiveMission('m2_dream')} className={`nav-item ${activeModule === 'm2' && activeMission === 'm2_dream' ? 'active' : ''} ${!moduleData.isCompleted ? 'opacity-50 cursor-not-allowed' : ''}`}>
                  <span className="truncate flex items-center gap-2">{!moduleData.isCompleted && <Lock size={12}/>} Dream Lab</span>
              </div>
+             <div onClick={() => moduleData.isCompleted && setActiveModule('m2') & setActiveMission('m2_sprint')} className={`nav-item ${activeModule === 'm2' && activeMission === 'm2_sprint' ? 'active' : ''} ${!moduleData.isCompleted ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                 <span className="truncate flex items-center gap-2">{!moduleData.isCompleted && <Lock size={12}/>} Design Sprint</span>
+             </div>
+             <div onClick={() => moduleData.isCompleted && setActiveModule('m2') & setActiveMission('m2_play')} className={`nav-item ${activeModule === 'm2' && activeMission === 'm2_play' ? 'active' : ''} ${!moduleData.isCompleted ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                 <span className="truncate flex items-center gap-2">{!moduleData.isCompleted && <Lock size={12}/>} Idea Playground</span>
+             </div>
 
-             {/* M3-M5 & Post-test Placeholders */}
+             {/* M3-M5 & Post-test Placeholders (Locked) */}
              <div className="mt-4 px-3 text-xs font-bold text-gray-400 uppercase">Next Modules</div>
-             <div onClick={() => setActiveModule('m3')} className={`nav-item ${activeModule === 'm3' ? 'active' : ''}`}><span className="truncate">Module 3: P-Participation</span></div>
-             <div onClick={() => setActiveModule('m4')} className={`nav-item ${activeModule === 'm4' ? 'active' : ''}`}><span className="truncate">Module 4: I-Innovation</span></div>
-             <div onClick={() => setActiveModule('m5')} className={`nav-item ${activeModule === 'm5' ? 'active' : ''}`}><span className="truncate">Module 5: RE-Reflection</span></div>
+             <div onClick={() => moduleData.m2_done && setActiveModule('m3')} className={`nav-item ${!moduleData.m2_done ? 'opacity-50 cursor-not-allowed' : ''}`}><span className="truncate flex items-center gap-2">{!moduleData.m2_done && <Lock size={12}/>} Module 3: P-Participation</span></div>
+             <div onClick={() => moduleData.m3_done && setActiveModule('m4')} className={`nav-item ${!moduleData.m3_done ? 'opacity-50 cursor-not-allowed' : ''}`}><span className="truncate flex items-center gap-2">{!moduleData.m3_done && <Lock size={12}/>} Module 4: I-Innovation</span></div>
+             <div onClick={() => moduleData.m4_done && setActiveModule('m5')} className={`nav-item ${!moduleData.m4_done ? 'opacity-50 cursor-not-allowed' : ''}`}><span className="truncate flex items-center gap-2">{!moduleData.m4_done && <Lock size={12}/>} Module 5: RE-Reflection</span></div>
              
              <div className="mt-4 pt-2 border-t border-gray-200">
-                <div onClick={() => setActiveModule('posttest')} className={`nav-item ${activeModule === 'posttest' ? 'active' : ''}`}><span className="flex items-center gap-2"><FileText size={16}/> Post-test</span></div>
+                <div onClick={() => moduleData.m5_done && setActiveModule('posttest')} className={`nav-item ${!moduleData.m5_done ? 'opacity-50 cursor-not-allowed' : ''}`}><span className="flex items-center gap-2">{!moduleData.m5_done && <Lock size={12}/>} <FileText size={16}/> Post-test</span></div>
              </div>
         </div>
       </div>
@@ -877,8 +718,7 @@ function CoursePlayer({ navigate, user }) {
   );
 }
 
-// ... (M1Pretest, M1Intro, M1Mission1, M1Mission2, M1Mission3, M1Mission4 SAME AS BEFORE) ...
-
+// ... (M1 Components M1Pretest -> M1Mission6 same as before) ...
 const M1Pretest = ({ data, updateData, setMission }) => {
     const [currentQ, setCurrentQ] = useState(0);
     const [selected, setSelected] = useState(null);
@@ -1203,6 +1043,8 @@ const M1Mission4 = ({ data, updateData, setMission }) => {
 
 const M1Mission5 = ({ data, updateData, setMission }) => {
     const strategy = data?.prioritizedStrategies?.[0];
+    
+    // Fixed: Initialize state lazily once to prevent overwrite
     const [plan, setPlan] = useState(() => {
         if (data?.actionPlan && strategy && data.actionPlan[strategy.id]) {
             return data.actionPlan[strategy.id];
@@ -1385,7 +1227,7 @@ const M1Mission6 = ({ data, updateData, user, goToNextModule }) => {
                          <div className="relative inline-block group">
                              <div className="absolute inset-0 bg-yellow-400 blur-3xl opacity-20 rounded-full animate-pulse"></div>
                              {/* UPDATED BADGE URL */}
-                             <img src="http://drive.google.com/uc?id=1n_17Z_NEj5FsYr217NVNf-DH4dFMnffF" alt="In-Sight Badge" className="w-64 h-auto mx-auto drop-shadow-2xl transform transition-transform group-hover:scale-105" />
+                             <img src="https://github.com/inspire360-app/imgbadge/blob/main/1-In-Sight.png?raw=true" alt="In-Sight Badge" className="w-64 h-auto mx-auto drop-shadow-2xl transform transition-transform group-hover:scale-105" />
                         </div>
                         <h3 className="text-2xl font-bold text-gray-800 mt-4">ยินดีด้วย! คุณได้รับ In-Sight Badge</h3>
                         <p className="text-gray-500">ปลดล็อก Module ถัดไปเรียบร้อยแล้ว</p>
@@ -1393,7 +1235,7 @@ const M1Mission6 = ({ data, updateData, user, goToNextModule }) => {
                 ) : (
                     <div className="mb-4">
                         <div className="flex justify-center mb-4"><div className="w-16 h-16 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-2xl shadow-lg">I</div></div>
-                        <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight">Module 1 Report: In-Sight Analysis</h2>
+                        <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight">Module 1 Report</h2>
                     </div>
                 )}
                 <div className="mt-4 flex justify-center items-center gap-4 text-sm text-gray-500"><span className="flex items-center gap-1"><User size={14}/> {user.displayName || user.email}</span><span>{new Date().toLocaleDateString('th-TH', { dateStyle: 'long' })}</span></div>
@@ -1463,6 +1305,7 @@ const M1Mission6 = ({ data, updateData, user, goToNextModule }) => {
     );
 };
 
+// ... M2 Components (Dream Lab, Sprint, Playground) ...
 const M2Intro = ({ setMission }) => (
     <div className="space-y-6 animate-in fade-in">
         <h2 className="text-2xl font-bold text-gray-900 border-b pb-4">Module 2: S-Design</h2>
@@ -1476,13 +1319,61 @@ const M2Intro = ({ setMission }) => (
     </div>
 );
 
-const M2DreamLab = () => (
-    <div className="text-center py-20">
-        <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto text-purple-600 mb-4"><Rocket size={32}/></div>
-        <h2 className="text-2xl font-bold text-gray-900">Dream Lab</h2>
-        <p className="text-gray-500">พื้นที่สำหรับการออกแบบความฝัน (Coming Soon)</p>
-    </div>
-);
+const M2DreamLab = ({ updateData }) => {
+    // Interactive: Challenge Prompt -> Word Cloud Mock -> Roadmap Form
+    const [step, setStep] = useState(1);
+    const [dreamText, setDreamText] = useState('');
+    
+    return (
+        <div className="space-y-8 pb-20">
+             <h2 className="text-3xl font-bold text-gray-900 border-b pb-4">Dream Lab ☁️</h2>
+             
+             {step === 1 && (
+                 <div className="text-center py-10 space-y-6 animate-in fade-in">
+                     <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto text-purple-600"><Rocket size={40}/></div>
+                     <h3 className="text-xl font-bold">Challenge Prompt</h3>
+                     <p className="text-gray-600">"ถ้าไม่มีข้อจำกัดใดๆ ห้องเรียนของคุณควรมีอะไรเพิ่มขึ้น 1 อย่าง"</p>
+                     <textarea className="w-full max-w-lg mx-auto p-4 border rounded-xl" rows="3" placeholder="พิมพ์ความฝันของคุณ..." value={dreamText} onChange={e=>setDreamText(e.target.value)}/>
+                     <Button onClick={()=>setStep(2)} disabled={!dreamText.trim()}>สร้าง Word Cloud <Sparkles/></Button>
+                 </div>
+             )}
+
+             {step === 2 && (
+                 <div className="text-center py-10 space-y-6 animate-in zoom-in">
+                      <h3 className="text-xl font-bold">Your Classroom Vision</h3>
+                      <div className="p-8 bg-slate-100 rounded-xl border border-slate-200">
+                          <p className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600">"{dreamText}"</p>
+                          <p className="text-sm text-gray-400 mt-4">(AI Word Cloud Placeholder)</p>
+                      </div>
+                      <Button onClick={()=>setStep(3)}>ไปออกแบบ Roadmap <ArrowRight/></Button>
+                 </div>
+             )}
+
+             {step === 3 && (
+                 <div className="space-y-6 animate-in slide-in-from-right-8">
+                     <h3 className="text-xl font-bold">Strategic Roadmap Explorer</h3>
+                     {/* Simplified 5 Steps Form */}
+                     {[
+                         {l:'1. จุดเริ่มต้น', p:'ปัญหาจาก In-Sight คือ?'},
+                         {l:'2. จุดหมาย', p:'ภาพความสำเร็จหน้าตาเป็นอย่างไร?'},
+                         {l:'3. สิ่งที่ต้องมี', p:'ทักษะ/เครื่องมือที่ขาดไม่ได้'},
+                         {l:'4. สิ่งที่ต้องเลิก', p:'วิธีการเดิมๆ ที่ฉุดรั้งเราไว้'},
+                         {l:'5. เส้นทาง', p:'ก้าวเล็กๆ ใน 30 วันแรก'}
+                     ].map((item,i) => (
+                         <div key={i} className="bg-white p-4 border rounded-lg">
+                             <label className="font-bold block mb-2">{item.l}</label>
+                             <input className="w-full p-2 border rounded" placeholder={item.p}/>
+                         </div>
+                     ))}
+                     <div className="flex justify-end"><Button>บันทึก Vision Card</Button></div>
+                 </div>
+             )}
+        </div>
+    );
+};
+
+const M2DesignSprint = () => <div className="p-20 text-center"><h2 className="text-2xl font-bold">Design Sprint (5W1H)</h2><p>Coming Soon...</p></div>;
+const M2Playground = () => <div className="p-20 text-center"><h2 className="text-2xl font-bold">Idea Playground</h2><p>Coming Soon...</p></div>;
 
 // M3, M4, M5, PostTest Placeholders
 const M3Structure = () => <div className="p-10 text-center"><h2 className="text-2xl font-bold mb-4">Module 3: P-Participation</h2><p>Coming Soon...</p></div>;
